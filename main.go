@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"os"
+	"time"
 
 	g2bwebp "github.com/gen2brain/webp"
 	"golang.org/x/image/webp"
@@ -41,6 +42,7 @@ func read_crop(in string, out string) {
 	var img image.Image
 	var err error
 
+
 	file, err := os.Open("test.webp")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -48,19 +50,23 @@ func read_crop(in string, out string) {
 	}
 	defer file.Close()
 
+
+	decstart := time.Now()
 	// Decode the WebP file
 	img, err = webp.Decode(file)
 	if err != nil {
 		fmt.Println("Error decoding WebP file:", err)
 		return
 	}
+	fmt.Println("decoding time:", time.Since(decstart))
 
 	err = g2bwebp.Dynamic()
 	if err != nil {
-		fmt.Println("NON-fatal error Dynamic lib file:", err)
+		fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n", err)
 		// return
 	}
 
+	encstart := time.Now()
 	// Create an output file
 	outfile, err := os.Create("output.webp")
 	if err != nil {
@@ -69,6 +75,7 @@ func read_crop(in string, out string) {
 	defer outfile.Close()
 
 	g2bwebp.Encode(outfile, img, g2bwebp.Options{Lossless: true, Method: 6, Exact: true})
+	fmt.Println("decoding time:", time.Since(encstart))
 
 
 }
