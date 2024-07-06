@@ -1,2 +1,8 @@
+github.com/pixiv/go-libwebp v0.1.1 h1:/+rtLMMpKbHYzoW4gpcVwjw9Cpc2ZlDnOlhkQRTCx8g=
+github.com/pixiv/go-libwebp v0.1.1/go.mod h1:KqHYCYNPuiJVoTM05fbluqpdFMVTPAnlS2ekCkF4L2k=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a h1:zvAhEO3ZB7m1Lc3BwJXLTDrLrHVAbcDByJ7XkL4WR+s=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a/go.mod h1:JU6yp7mldR7lmftjHPtaDs+Q8xn7l2tMR1XYx5iJELg=
+golang.org/x/image v0.18.0 h1:jGzIakQa/ZXI1I0Fxvaa9W7yP25TqT6cHIHn+6CqvSQ=
+golang.org/x/image v0.18.0/go.mod h1:4yyo5vMFQjVjUcVk4jEQcU9MGy/rulF5WvUILseCM2E=
+gopkg.in/gographics/imagick.v3 v3.7.0 h1:w8iQa58ikuqjX4l2OVML3pgqFcDMD8ywXJ9/cXa33fk=
+gopkg.in/gographics/imagick.v3 v3.7.0/go.mod h1:+Q9nyA2xRZXrDyTtJ/eko+8V/5E7bWYs08ndkZp8UmA=
