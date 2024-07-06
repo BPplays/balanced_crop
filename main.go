@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"image"
+	"image/color"
 	"log"
 
 	"github.com/tidbyt/go-libwebp/test/util"
@@ -12,8 +14,12 @@ import (
 
 
 func crop_brd(img *image.RGBA, border_percent float64) {
-	tlcol := img.At(0, 0)
-	
+	// tlcol := img.At(0, 0)
+	bounds := img.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		rightmostColor := img.At(bounds.Max.X-1, y).(color.RGBA)
+		fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
+	}
 }
 
 
@@ -50,32 +56,5 @@ func read_crop(in string, out string) {
 }
 
 func main() {
-	var err error
-
-	// Read binary data
-	data := util.ReadFile("cosmos.webp")
-
-	// Decode
-	options := &webp.DecoderOptions{}
-	img, err := webp.DecodeRGBA(data, options)
-	if err != nil {
-		panic(err)
-	}
-
-	img := util.ReadPNG("cosmos.png")
-
-	// Create file and buffered writer
-	io := util.CreateFile("encoded_cosmos.webp")
-	w := bufio.NewWriter(io)
-	defer func() {
-		w.Flush()
-		io.Close()
-	}()
-
-	config := webp.ConfigPreset(webp.PresetDefault, 90)
-
-	// Encode into WebP
-	if err := webp.EncodeRGBA(w, img.(*image.RGBA), config); err != nil {
-		panic(err)
-	}
+	read_crop("test.webp", "out.webp")
 }
