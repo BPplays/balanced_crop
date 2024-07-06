@@ -13,6 +13,7 @@ import (
 
 func crop_brd(img *image.RGBA, border_percent float64) {
 	tlcol := img.At(0, 0)
+	
 }
 
 
