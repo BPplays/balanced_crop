@@ -16,7 +16,7 @@ import (
 )
 
 
-func IsSimilar(c1, c2 color.RGBA, SimilarityThreshold float64) bool {
+func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
 	return math.Abs(float64(c1.R)-float64(c2.R)) <= SimilarityThreshold &&
 		math.Abs(float64(c1.G)-float64(c2.G)) <= SimilarityThreshold &&
 		math.Abs(float64(c1.B)-float64(c2.B)) <= SimilarityThreshold &&
@@ -35,23 +35,23 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 	var final_pixel_wcnt int = -1
 	// var final_pixel_hcnt int = -1
 
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		rightmostColor := (*img).At(bounds.Max.X-1, y).(color.RGBA)
-		fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
-	}
+	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
+	// 	fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
+	// }
 
 	
 	for x := bounds.Min.X; x < width; x++ {
-		rightmostColor := (*img).At(0, 0).(color.RGBA)
+		rightmostColor := (*img).At(0, 0).(color.NRGBA)
 
 		for y := bounds.Min.Y; y < height; y++ {
-			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.RGBA), rightmostColor, SimilarityThreshold) {
+			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), rightmostColor, SimilarityThreshold) {
 				final_pixel_wcnt = x
 			}
 		}
 
 		for y := height; y > bounds.Min.Y ; y++ {
-			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.RGBA), rightmostColor, SimilarityThreshold) {
+			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), rightmostColor, SimilarityThreshold) {
 				final_pixel_wcnt = x
 			}
 		}
@@ -121,7 +121,10 @@ func read_crop(in string, out string) {
 		// return
 	}
 
+	cropstart := time.Now()
 	croppedImg := crop_brd(&img, 10)
+	fmt.Println("encoding time:", time.Since(cropstart))
+
 
 	encstart := time.Now()
 	// Create an output file
