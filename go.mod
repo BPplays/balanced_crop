@@ -10,6 +10,7 @@ require (
 require (
 	github.com/ebitengine/purego v0.7.1 // indirect
 	github.com/gen2brain/webp v0.4.5 // indirect
+	github.com/oliamb/cutter v0.2.2 // indirect
 	github.com/tetratelabs/wazero v1.7.3 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 )
