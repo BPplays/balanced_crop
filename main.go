@@ -79,7 +79,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 		for y := width; y > bounds.Min.Y ; y-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(width-x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
+			if IsSimilar((*img).At(width-x-1, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_wcnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -152,7 +152,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 		for x := height; x > bounds.Min.X ; x-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(x, height-y-2).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, height-y-1).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_hcnt = x
 				hcnt_times++
 				hcnt_times_long++
