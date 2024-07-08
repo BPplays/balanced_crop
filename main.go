@@ -402,9 +402,9 @@ func main() {
 
     pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
 
-	pflag.BoolVar(&webp_lossless, "lossy", false, "placeholder")
+	pflag.BoolVar(&webp_lossless, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "a border percentage")
-	pflag.IntVarP(&webp_qual, "webp_quality", "q", 95, "webp quality only effects lossy images")
+	pflag.IntVar(&webp_qual, "webp_quality", 95, "webp quality only effects lossy images")
 	pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
 	webp_lossless = !webp_lossy
