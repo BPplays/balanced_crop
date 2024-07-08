@@ -398,15 +398,15 @@ func main() {
 
     pflag.StringVarP(&input, "input", "i", "", "file to read from")
     pflag.StringVarP(&output, "output", "o", "", "output file")
-    pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.0035, "placeholder")
+    pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.003, "placeholder")
     pflag.Float64VarP(&long_exit_mul, "long_exit_mul", "l", 0.004, "placeholder")
     pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
 
     pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
 
 	pflag.BoolVar(&webp_lossless, "lossy", false, "lossy webp mode")
-	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "a border percentage")
-	pflag.IntVarP(&quality0_100, "webp_quality", "q", 95, "lossy webp and jpeg quality, 0 to 100 for webp, 1 to 100 for jpeg")
+	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
+	pflag.IntVarP(&quality0_100, "quality", "q", 95, "lossy webp and jpeg quality, 0 to 100 for webp, 1 to 100 for jpeg")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
 	webp_lossless = !webp_lossy
