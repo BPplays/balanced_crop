@@ -352,7 +352,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	switch out_ext {
 	case ".webp":
-		fmt.Println("webp lossless: ", webp_lossless)
+		fmt.Println("webp lossless:", webp_lossless)
 		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: webp_qual, Method: webp_method, Exact: true})
 		if err != nil {
 			fmt.Println("Error encoding WebP file:", err)
@@ -365,6 +365,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 			return
 		}
 	case ".jpg", ".jpeg":
+		fmt.Println("jpeg quality:", jpeg_qual)
 		err = jpeg.Encode(outfile, *croppedImg, &jpeg.Options{Quality: jpeg_qual})
 		if err != nil {
 			fmt.Println("Error encoding jpeg file:", err)
