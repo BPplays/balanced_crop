@@ -438,23 +438,13 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 			// return
 		}
 		fmt.Println("webp lossless:", webp_lossless)
-		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: quality0_100, Method: webp_method, Exact: true})
+		err = jpegxl.Encode(outfile, *croppedImg, jpegxl.Options{Quality: quality0_100, Effort: jpegxl_effort})
 		if err != nil {
 			fmt.Println("Error encoding WebP file:", err)
 			return
 		}
 	case "image/heif", "image/heif-sequence", "image/heic", "image/heic-sequence":
-		err = g2bwebp.Dynamic()
-		if err != nil {
-			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
-			// return
-		}
-		fmt.Println("webp lossless:", webp_lossless)
-		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: quality0_100, Method: webp_method, Exact: true})
-		if err != nil {
-			fmt.Println("Error encoding WebP file:", err)
-			return
-		}
+		log.Fatalln("can't encode to heic")
 	case "image/png":
 		err = png.Encode(outfile, *croppedImg)
 		if err != nil {
@@ -486,6 +476,7 @@ var webp_lossless bool = true
 var webp_lossy bool
 var webp_method int
 var avif_speed int
+var jpegxl_effort int
 var chroma_sub_str string
 var chroma_sub image.YCbCrSubsampleRatio
 var quality0_100 int
@@ -508,9 +499,9 @@ func main() {
 	pflag.BoolVar(&webp_lossless, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
 	pflag.IntVar(&avif_speed, "avif_speed", 0, "Speed in the range [0,10]. Slower should make for a better quality image in less bytes. lower is slower")
-	pflag.StringVar(&chroma_sub_str, "chroma_sub", "422", "Chroma subsampling, 444|422|420. applys to avif")
-	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg")
-	pflag.IntVarP(&quality0_100, "quality_alpha", "a", 100, "alpha quality. avif,")
+	pflag.StringVar(&chroma_sub_str, "chroma_sub", "444", "Chroma subsampling, 444|422|420. applys to avif")
+	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg\nQuality of 100 implies lossless for webp, jpeg xl, and avif")
+	pflag.IntVarP(&quality0_100_alpha, "quality_alpha", "a", 100, "alpha quality. avif,")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
 	fmt.Println(webp_lossy)
