@@ -292,6 +292,10 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	var img image.Image
 	var err error
 
+	mime.AddExtensionType(".webp", "image/webp")
+	mime.AddExtensionType(".avif", "image/avif")
+	mime.AddExtensionType(".jxl", "image/jxl")
+
 	in_mime := mime.TypeByExtension(filepath.Ext(*in))
 	out_mime := mime.TypeByExtension(filepath.Ext(*out))
 
