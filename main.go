@@ -352,6 +352,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	switch out_ext {
 	case ".webp":
+		fmt.Println("webp_lossless: ", webp_lossless)
 		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: webp_qual, Method: webp_method, Exact: true})
 		if err != nil {
 			fmt.Println("Error encoding WebP file:", err)
@@ -406,7 +407,7 @@ func main() {
 	pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
 	webp_lossless = !webp_lossy
-	fmt.Println("webp_lossless: ", webp_lossless)
+
 
     pflag.Parse()
     viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
