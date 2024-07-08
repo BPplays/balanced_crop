@@ -26,14 +26,28 @@ func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
 
 func crop_brd(img *image.Image, border_percent float64) *image.Image {
 	// tlcol := img.At(0, 0)
-	var SimilarityThreshold float64 = 5
+	var SimilarityThreshold float64 = 54
 
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
 
+	short_exit_h := int(math.Max(float64(height) * 0.01, 5))
+
+	long_exit_h := int(math.Max(float64(height) * 0.01, 5))
+
+	if height < 20 {
+		short_exit_h = 2
+	}
+
+	border_px := int(float64(height) * (border_percent / 100))
+
 	var final_pixel_wcnt int = -1
 	// var final_pixel_hcnt int = -1
+	var wcnt_times int = 0
+	var wcnt_times_long int = 0
+
+	
 
 	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
@@ -42,31 +56,55 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 
 	
 	for x := bounds.Min.X; x < width; x++ {
-		rightmostColor := (*img).At(0, 0).(color.NRGBA)
+		tl_col := (*img).At(0, 0).(color.NRGBA)
+		fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
+
+		wcnt_times_long = 0
 		for y := bounds.Min.Y; y < height; y++ {
-			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), rightmostColor, SimilarityThreshold) {
+			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
 				final_pixel_wcnt = x
+				wcnt_times++
+				wcnt_times_long++
+				fmt.Println((*img).At(x, y).(color.NRGBA))
+			} else {
+				wcnt_times = 0
+			}
+			if final_pixel_wcnt >= 0 && wcnt_times > short_exit_h && wcnt_times_long > long_exit_h {
+				break
 			}
 		}
 
-		for y := height; y > bounds.Min.Y ; y++ {
-			if !IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), rightmostColor, SimilarityThreshold) {
+
+		wcnt_times_long = 0
+		for y := height; y > bounds.Min.Y ; y-- {
+			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
+			// fmt.Println(final_pixel_wcnt, x)
+			if IsSimilar((*img).At(width-x-1-1, y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
 				final_pixel_wcnt = x
+				wcnt_times++
+				wcnt_times_long++
+				fmt.Println((*img).At(x, y).(color.NRGBA))
+			} else {
+				wcnt_times = 0
+			}
+			if final_pixel_wcnt >= 0 && wcnt_times > short_exit_h && wcnt_times_long > long_exit_h {
+				break
 			}
 		}
 
-		if final_pixel_wcnt != -1 {
+		if final_pixel_wcnt >= 0 && wcnt_times > short_exit_h {
+			fmt.Println(final_pixel_wcnt)
 			break
 		}
 
 	}
 
-
+	cwid := math.Min(float64(width - (final_pixel_wcnt - (border_px * 2)) * 2), float64(width))
 
 	croppedImg, err := cutter.Crop(*img, cutter.Config{
-		Width: 250,
-		Height: 500,
+		Width: int(math.Round(cwid)),
+		Height: height,
 		Mode: cutter.Centered,
 	  })
 	if err != nil {
@@ -122,8 +160,8 @@ func read_crop(in string, out string) {
 	}
 
 	cropstart := time.Now()
-	croppedImg := crop_brd(&img, 10)
-	fmt.Println("encoding time:", time.Since(cropstart))
+	croppedImg := crop_brd(&img, 0.5)
+	fmt.Println("trim and crop time:", time.Since(cropstart))
 
 
 	encstart := time.Now()
