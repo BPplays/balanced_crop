@@ -4,6 +4,12 @@ github.com/ebitengine/purego v0.7.1 h1:6/55d26lG3o9VCZX8lping+bZcmShseiqlh2bnUDi
 github.com/ebitengine/purego v0.7.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
+github.com/gen2brain/avif v0.3.2 h1:XUR0CBl5n4ISFJE8/pc1RMEKt5KUVoW8InctN+M7+DQ=
+github.com/gen2brain/avif v0.3.2/go.mod h1:tdL2sV6oOJXBZZvT5iP55VEM1X2c3/yJmYKMJTl8fXg=
+github.com/gen2brain/heic v0.3.1 h1:ClY5YTdXdIanw7pe9ZVUM9XcsqH6CCCa5CZBlm58qOs=
+github.com/gen2brain/heic v0.3.1/go.mod h1:m2sVIf02O7wfO8mJm+PvE91lnq4QYJy2hseUon7So10=
+github.com/gen2brain/jpegxl v0.3.1 h1:QAcs68WXQUQRABPVu5p5MineuqfqnVd/JRiI+s7AEE4=
+github.com/gen2brain/jpegxl v0.3.1/go.mod h1:jLh4Fl9QaHkc1RsOJu4S2r20x+gSzjnuM+K8jOm4DEo=
 github.com/gen2brain/webp v0.4.5 h1:wolsWSKnYfnYaWUtGLx3EfXhLWVvVx9yZGof+JNGYgY=
 github.com/gen2brain/webp v0.4.5/go.mod h1:giUCZaJt7D8ae9AjSq4gC3QKUuA9SD8LZy0o2zcWxMI=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=

@@ -10,6 +10,9 @@ require (
 require (
 	github.com/ebitengine/purego v0.7.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gen2brain/avif v0.3.2 // indirect
+	github.com/gen2brain/heic v0.3.1 // indirect
+	github.com/gen2brain/jpegxl v0.3.1 // indirect
 	github.com/gen2brain/webp v0.4.5 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

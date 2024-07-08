@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"log"
 	"math"
+	"mime"
 	"os"
 	"path/filepath"
 	"time"
@@ -268,9 +269,10 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	var img image.Image
 	var err error
 
+	in_mime := mime.TypeByExtension(filepath.Ext(*in))
+	out_mime := mime.TypeByExtension(filepath.Ext(*out))
 
-	in_ext := filepath.Ext(*in)
-	out_ext := filepath.Ext(*out)
+
 
 
 	file, err := os.Open(*in)
@@ -283,20 +285,40 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	decstart := time.Now()
 	// Decode the WebP file
-	switch in_ext {
-	case ".webp":
+	switch in_mime {
+	case "image/webp":
 		img, err = webp.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
 			return
 		}
-	case ".png":
+	case "image/avif":
 		img, err = png.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
 			return
 		}
-	case ".jpg", ".jpeg":
+	case "image/jxl":
+		img, err = png.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+	case "image/heif", "image/heif-sequence", "image/heic", "image/heic-sequence":
+		img, err = png.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+
+
+	case "image/png":
+		img, err = png.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+	case "image/jpeg":
 		img, err = jpeg.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
@@ -324,18 +346,14 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 				break
 			}
 		} else {
-			log.Fatalln("can't try to decode unknown file extension with --unsafe")
+			log.Fatalln("can't try to decode unknown file extension without --unsafe")
 		}
 	}
 
 	fmt.Println("decoding time:", time.Since(decstart))
 
 
-	err = g2bwebp.Dynamic()
-	if err != nil {
-		fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
-		// return
-	}
+
 
 	cropstart := time.Now()
 	croppedImg := crop_brd(&img, border_p, short_exit_mul, long_exit_mul)
@@ -350,21 +368,26 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	}
 	defer outfile.Close()
 
-	switch out_ext {
-	case ".webp":
+	switch out_mime {
+	case "image/webp":
+		err = g2bwebp.Dynamic()
+		if err != nil {
+			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
+			// return
+		}
 		fmt.Println("webp lossless:", webp_lossless)
 		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: quality0_100, Method: webp_method, Exact: true})
 		if err != nil {
 			fmt.Println("Error encoding WebP file:", err)
 			return
 		}
-	case ".png":
+	case "image/png":
 		err = png.Encode(outfile, *croppedImg)
 		if err != nil {
 			fmt.Println("Error encoding png file:", err)
 			return
 		}
-	case ".jpg", ".jpeg":
+	case "image/jpeg":
 		if quality0_100 < 1 {
 			quality0_100 = 1
 		}
@@ -409,6 +432,7 @@ func main() {
 	pflag.IntVarP(&quality0_100, "quality", "q", 95, "lossy webp and jpeg quality, 0 to 100 for webp, 1 to 100 for jpeg")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
+	fmt.Println(webp_lossy)
 	webp_lossless = !webp_lossy
 
 	if quality0_100 < 0 {
