@@ -25,9 +25,6 @@ func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
 
 
 func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
-	// tlcol := img.At(0, 0)
-	// var SimilarityThreshold float64 = 54
-
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
@@ -103,77 +100,82 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 	return &cwid, &final_pixel_wcnt
 }
 
-func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
-	// tlcol := img.At(0, 0)
 
+
+func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
 
+	short_exit := int(math.Max(float64(width) * 0.01, 5))
 
-	short_exit_h := int(math.Max(float64(height) * 0.01, 5))
+	long_exit := int(math.Max(float64(width) * 0.05, 5))
 
-	long_exit_h := int(math.Max(float64(height) * 0.05, 5))
-
-	if height < 20 {
-		short_exit_h = 2
+	if width < 20 {
+		short_exit = 2
 	}
 
-	border_px_hig := int(float64(width) * (*border_percent / 100))
+	border_px_wid := int(float64(width) * (*border_percent / 100))
 
-	var final_pixel_hcnt int = -1
-	var hcnt_times int = 0
-	var hcnt_times_long int = 0
+	var final_pixel_cnt int = -1
+	var cnt_times int = 0
+	var cnt_times_long int = 0
 
+	
 
+	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
+	// 	fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
+	// }
 
+	
 	for y := bounds.Min.Y; y < width; y++ {
-		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y).(color.NRGBA)
+		tl_col := (*img).At(0, 0).(color.NRGBA)
 		fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
-		hcnt_times_long = 0
+		cnt_times_long = 0
 		for x := bounds.Min.X; x < height; x++ {
 			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
-				final_pixel_hcnt = x
-				hcnt_times++
-				hcnt_times_long++
+				final_pixel_cnt = x
+				cnt_times++
+				cnt_times_long++
 				fmt.Println((*img).At(x, y).(color.NRGBA))
 			} else {
-				hcnt_times = 0
+				cnt_times = 0
 			}
-			if final_pixel_hcnt >= 0 && (hcnt_times > short_exit_h || hcnt_times_long > long_exit_h) {
+			if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
 				break
 			}
 		}
 
 
-		hcnt_times_long = 0
-		for x := height; x > bounds.Min.X ; x-- {
+		cnt_times_long = 0
+		for x := width; x > bounds.Min.X ; y-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
 			if IsSimilar((*img).At(x, height-y-1).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
-				final_pixel_hcnt = x
-				hcnt_times++
-				hcnt_times_long++
+				final_pixel_cnt = x
+				cnt_times++
+				cnt_times_long++
 				fmt.Println((*img).At(x, y).(color.NRGBA))
 			} else {
-				hcnt_times = 0
+				cnt_times = 0
 			}
-			if final_pixel_hcnt >= 0 && (hcnt_times > short_exit_h || hcnt_times_long > long_exit_h) {
+			if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
 				break
 			}
 		}
 
-		if final_pixel_hcnt >= 0 && (hcnt_times > short_exit_h || hcnt_times_long > long_exit_h) {
-			fmt.Println(final_pixel_hcnt)
+		if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
+			fmt.Println(final_pixel_cnt)
 			break
 		}
 
 	}
 
-	chig := math.Min(float64(height - (final_pixel_hcnt - (border_px_hig * 2)) * 2), float64(width))
-	return &chig, &final_pixel_hcnt
+	cwid := math.Min(float64(width - (final_pixel_cnt - (border_px_wid * 2)) * 2), float64(width))
+	return &cwid, &final_pixel_cnt
 }
 
 
