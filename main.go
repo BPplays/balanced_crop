@@ -403,13 +403,10 @@ func main() {
 	pflag.BoolVar(&webp_lossless, "lossy", false, "placeholder")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "a border percentage")
 	pflag.IntVarP(&webp_qual, "webp_quality", "q", 95, "webp quality only effects lossy images")
-	pflag.IntVar(&jpeg_qual, "border_percent", 95, "a border percentage")
+	pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
-	if webp_lossy != true {
-		webp_lossless = true
-	} else if webp_lossy == true {
-		webp_lossless = false
-	}
+	webp_lossless = !webp_lossy
+	fmt.Println("webp_lossless: ", webp_lossless)
 
     pflag.Parse()
     viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
