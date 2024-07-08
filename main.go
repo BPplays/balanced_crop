@@ -12,6 +12,8 @@ import (
 
 	g2bwebp "github.com/gen2brain/webp"
 	"github.com/oliamb/cutter"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"golang.org/x/image/webp"
 )
 
@@ -24,17 +26,17 @@ func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
 }
 
 
-func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
+func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
 
-	short_exit_w := int(math.Max(float64(width) * 0.0035, 5))
+	short_exit := int(math.Max(float64(width) * (*short_exit_mul), 5))
 
-	long_exit_w := int(math.Max(float64(width) * 0.004, 5))
+	long_exit := int(math.Max(float64(width) * (*long_exit_mul), 5))
 
 	if width < 20 {
-		short_exit_w = 2
+		short_exit = 2
 	}
 
 	border_px_wid := int(float64(width) * (*border_percent / 100))
@@ -66,7 +68,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 			} else {
 				wcnt_times = 0
 			}
-			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit_w || wcnt_times_long > long_exit_w) {
+			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
 				break
 			}
 		}
@@ -84,12 +86,12 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 			} else {
 				wcnt_times = 0
 			}
-			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit_w || wcnt_times_long > long_exit_w) {
+			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
 				break
 			}
 		}
 
-		if final_pixel_wcnt >= 0 && (wcnt_times > short_exit_w || wcnt_times_long > long_exit_w) {
+		if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
 			fmt.Println(final_pixel_wcnt)
 			break
 		}
@@ -102,14 +104,14 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 
 
-func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
+func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
 
-	short_exit := int(math.Max(float64(height) * 0.0035, 5))
+	short_exit := int(math.Max(float64(height) * (*short_exit_mul), 5))
 
-	long_exit := int(math.Max(float64(height) * 0.004, 5))
+	long_exit := int(math.Max(float64(height) * (*long_exit_mul), 5))
 
 	if height < 20 {
 		short_exit = 2
@@ -183,15 +185,15 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 
 
-func crop_brd(img *image.Image, border_percent float64) *image.Image {
+func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float64, long_exit_mul *float64) *image.Image {
 
 	var SimilarityThreshold float64 = 54
 
 
 
 
-	cwid, final_pixel_wcnt := crop_brd_w(img, &border_percent, &SimilarityThreshold)
-	chig, final_pixel_hcnt := crop_brd_h(img, &border_percent, &SimilarityThreshold)
+	cwid, final_pixel_wcnt := crop_brd_w(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
+	chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
 
 
 	fmt.Printf("\nh crop: %v, w crop: %v\n", *final_pixel_hcnt, *final_pixel_wcnt)
@@ -234,14 +236,13 @@ func imageToRGBA(src *image.Image) *image.RGBA {
     return dst
 }
 
-func read_crop(in string, out string) {
+func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *float64, long_exit_mul *float64) {
 
-	border_p := 0.2
 	var img image.Image
 	var err error
 
 
-	file, err := os.Open(in)
+	file, err := os.Open(*in)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -266,13 +267,13 @@ func read_crop(in string, out string) {
 	}
 
 	cropstart := time.Now()
-	croppedImg := crop_brd(&img, border_p)
+	croppedImg := crop_brd(&img, border_p, short_exit_mul, long_exit_mul)
 	fmt.Println("trim and crop time:", time.Since(cropstart))
 
 
 	encstart := time.Now()
 	// Create an output file
-	outfile, err := os.Create(out)
+	outfile, err := os.Create(*out)
 	if err != nil {
 		panic(err)
 	}
@@ -285,5 +286,19 @@ func read_crop(in string, out string) {
 }
 
 func main() {
-	read_crop("test.webp", "out.webp")
+
+
+    var input, output string
+	var short_exit_mul, long_exit_mul, border_p float64
+
+    pflag.StringVarP(&input, "input", "i", "", "file to read from")
+    pflag.StringVarP(&output, "output", "o", "", "output file")
+    pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.0035, "placeholder")
+    pflag.Float64VarP(&long_exit_mul, "long_exit_mul", "l", 0.004, "placeholder")
+    pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
+
+    pflag.Parse()
+    viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
+
+	read_crop(&input, &output, &border_p, &short_exit_mul, &long_exit_mul)
 }
