@@ -5,9 +5,12 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"image/jpeg"
+	"image/png"
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"time"
 
 	g2bwebp "github.com/gen2brain/webp"
@@ -41,7 +44,8 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	border_px_wid := int(float64(width) * (*border_percent / 100))
 
-	var final_pixel_wcnt int = -1
+	var final_pixel_cnt int = -1
+
 	var wcnt_times int = 0
 	var wcnt_times_long int = 0
 
@@ -54,21 +58,21 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	
 	for x := bounds.Min.X; x < width; x++ {
-		tl_col := (*img).At(0, 0).(color.NRGBA)
+		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y).(color.NRGBA)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		wcnt_times_long = 0
 		for y := bounds.Min.Y; y < height; y++ {
 			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
-				final_pixel_wcnt = x
+				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
 				// fmt.Println((*img).At(x, y).(color.NRGBA))
 			} else {
 				wcnt_times = 0
 			}
-			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+			if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
 				break
 			}
 		}
@@ -79,27 +83,37 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
 			if IsSimilar((*img).At(width-x-1, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
-				final_pixel_wcnt = x
+				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
 				// fmt.Println((*img).At(x, y).(color.NRGBA))
 			} else {
 				wcnt_times = 0
 			}
-			if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+			if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
 				break
 			}
 		}
 
-		if final_pixel_wcnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
-			fmt.Println(final_pixel_wcnt)
+		// final_pixel_cnt = int(math.Min(float64(final_pixel_cnt1), float64(final_pixel_cnt2)))
+		// if final_pixel_cnt < 0 {
+		// 	if final_pixel_cnt1 >= 0 || final_pixel_cnt2 >= 0 {
+		// 		final_pixel_cnt = 0
+		// 	}
+		// }
+
+		// final_pixel_cnt = final_pixel_cnt1
+		// fmt.Printf("windth -- final_pixel_cnt1: %v, final_pixel_cnt2: %v\n", final_pixel_cnt1, final_pixel_cnt2)
+
+		if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+			// fmt.Println(final_pixel_wcnt)
 			break
 		}
 
 	}
 
-	cwid := math.Min(float64(width - (final_pixel_wcnt - (border_px_wid * 2)) * 2), float64(width))
-	return &cwid, &final_pixel_wcnt
+	cwid := math.Min(float64(width - (final_pixel_cnt - (border_px_wid * 2)) * 2), float64(width))
+	return &cwid, &final_pixel_cnt
 }
 
 
@@ -120,6 +134,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 	border_px := int(float64(height) * (*border_percent / 100))
 
 	var final_pixel_cnt int = -1
+
 	var cnt_times int = 0
 	var cnt_times_long int = 0
 
@@ -133,7 +148,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 	
 	for y := bounds.Min.Y; y < width; y++ {
 		tl_col := (*img).At(0, 0).(color.NRGBA)
-		fmt.Println("h tlcol:", tl_col)
+		// fmt.Println("h tlcol:", tl_col)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
@@ -170,8 +185,18 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 			}
 		}
 
+		// final_pixel_cnt = int(math.Min(float64(final_pixel_cnt1), float64(final_pixel_cnt2)))
+		// if final_pixel_cnt < 0 {
+		// 	if final_pixel_cnt1 >= 0 || final_pixel_cnt2 >= 0 {
+		// 		final_pixel_cnt = 0
+		// 	}
+		// }
+
+		// // final_pixel_cnt = final_pixel_cnt1
+		// fmt.Printf("height -- final_pixel_cnt1: %v, final_pixel_cnt2: %v\n", final_pixel_cnt1, final_pixel_cnt2)
+
 		if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
-			fmt.Println(final_pixel_cnt)
+			// fmt.Println(final_pixel_cnt)
 			break
 		}
 
@@ -187,7 +212,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float64, long_exit_mul *float64) *image.Image {
 
-	var SimilarityThreshold float64 = 54
+	var SimilarityThreshold float64 = 5
 
 
 
@@ -196,7 +221,7 @@ func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float6
 	chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
 
 
-	fmt.Printf("\nh crop: %v, w crop: %v\n", *final_pixel_hcnt, *final_pixel_wcnt)
+	fmt.Printf("h crop: %v, w crop: %v\n", *final_pixel_hcnt, *final_pixel_wcnt)
 
 
 
@@ -236,10 +261,15 @@ func imageToRGBA(src *image.Image) *image.RGBA {
     return dst
 }
 
+
+
 func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *float64, long_exit_mul *float64) {
 
 	var img image.Image
 	var err error
+
+
+	ext := filepath.Ext(*in)
 
 
 	file, err := os.Open(*in)
@@ -252,11 +282,52 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	decstart := time.Now()
 	// Decode the WebP file
-	img, err = webp.Decode(file)
-	if err != nil {
-		fmt.Println("Error decoding WebP file:", err)
-		return
+	switch ext {
+	case ".webp":
+		img, err = webp.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+	case ".png":
+		img, err = png.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+	case ".jpg", ".jpeg":
+		img, err = jpeg.Decode(file)
+		if err != nil {
+			fmt.Println("Error decoding WebP file:", err)
+			return
+		}
+	default:
+		if unsafe {
+			img, err = webp.Decode(file)
+			if err != nil {
+				fmt.Println("Unknown file type and can't decode as WebP:", err)
+			} else {
+				break
+			}
+			img, err = png.Decode(file)
+			if err != nil {
+				fmt.Println("Unknown file type and can't decode as PNG:", err)
+			} else {
+				break
+			}
+			img, err = jpeg.Decode(file)
+			if err != nil {
+				fmt.Println("Unknown file type and can't decode as JPEG:", err)
+				log.Fatalln("exhausted all decoding options exiting")
+			} else {
+				break
+			}
+		} else {
+			log.Fatalln("can't try to decode unknown file extension with --unsafe")
+		}
+
 	}
+
 	fmt.Println("decoding time:", time.Since(decstart))
 
 
@@ -285,6 +356,9 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 }
 
+
+var unsafe bool = false
+
 func main() {
 
 
@@ -296,6 +370,8 @@ func main() {
     pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.0035, "placeholder")
     pflag.Float64VarP(&long_exit_mul, "long_exit_mul", "l", 0.004, "placeholder")
     pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
+
+    pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
 
     pflag.Parse()
     viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
