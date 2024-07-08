@@ -269,7 +269,8 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	var err error
 
 
-	ext := filepath.Ext(*in)
+	in_ext := filepath.Ext(*in)
+	out_ext := filepath.Ext(*out)
 
 
 	file, err := os.Open(*in)
@@ -282,7 +283,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	decstart := time.Now()
 	// Decode the WebP file
-	switch ext {
+	switch in_ext {
 	case ".webp":
 		img, err = webp.Decode(file)
 		if err != nil {
@@ -325,7 +326,6 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 		} else {
 			log.Fatalln("can't try to decode unknown file extension with --unsafe")
 		}
-
 	}
 
 	fmt.Println("decoding time:", time.Since(decstart))
@@ -350,14 +350,41 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	}
 	defer outfile.Close()
 
-	g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Method: 6, Exact: true})
-	fmt.Println("encoding time:", time.Since(encstart))
+	switch out_ext {
+	case ".webp":
+		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: webp_qual, Method: webp_method, Exact: true})
+		if err != nil {
+			fmt.Println("Error encoding WebP file:", err)
+			return
+		}
+	case ".png":
+		err = png.Encode(outfile, *croppedImg)
+		if err != nil {
+			fmt.Println("Error encoding png file:", err)
+			return
+		}
+	case ".jpg", ".jpeg":
+		err = jpeg.Encode(outfile, *croppedImg, &jpeg.Options{Quality: jpeg_qual})
+		if err != nil {
+			fmt.Println("Error encoding jpeg file:", err)
+			return
+		}
+	default:
+		log.Fatalln("can't encode unknown file extension")
+	}
 
+	fmt.Println("encoding time:", time.Since(encstart))
 
 }
 
 
 var unsafe bool = false
+
+var webp_lossless bool = true
+var webp_lossy bool
+var webp_method int
+var webp_qual int
+var jpeg_qual int
 
 func main() {
 
@@ -372,6 +399,17 @@ func main() {
     pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
 
     pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
+
+	pflag.BoolVar(&webp_lossless, "lossy", false, "placeholder")
+	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "a border percentage")
+	pflag.IntVarP(&webp_qual, "webp_quality", "q", 95, "webp quality only effects lossy images")
+	pflag.IntVar(&jpeg_qual, "border_percent", 95, "a border percentage")
+
+	if webp_lossy != true {
+		webp_lossless = true
+	} else if webp_lossy == true {
+		webp_lossless = false
+	}
 
     pflag.Parse()
     viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
