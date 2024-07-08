@@ -107,15 +107,15 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
     width := bounds.Dx()
     height := bounds.Dy()
 
-	short_exit := int(math.Max(float64(width) * 0.01, 5))
+	short_exit := int(math.Max(float64(height) * 0.01, 5))
 
-	long_exit := int(math.Max(float64(width) * 0.05, 5))
+	long_exit := int(math.Max(float64(height) * 0.05, 5))
 
-	if width < 20 {
+	if height < 20 {
 		short_exit = 2
 	}
 
-	border_px_wid := int(float64(width) * (*border_percent / 100))
+	border_px := int(float64(height) * (*border_percent / 100))
 
 	var final_pixel_cnt int = -1
 	var cnt_times int = 0
@@ -174,7 +174,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	}
 
-	cwid := math.Min(float64(width - (final_pixel_cnt - (border_px_wid * 2)) * 2), float64(width))
+	cwid := math.Min(float64(height - (final_pixel_cnt - (border_px * 2)) * 2), float64(height))
 	return &cwid, &final_pixel_cnt
 }
 
