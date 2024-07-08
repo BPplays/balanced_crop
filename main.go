@@ -14,6 +14,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gen2brain/avif"
+	"github.com/gen2brain/heic"
+	"github.com/gen2brain/jpegxl"
 	g2bwebp "github.com/gen2brain/webp"
 	"github.com/oliamb/cutter"
 	"github.com/spf13/pflag"
@@ -263,6 +266,26 @@ func imageToRGBA(src *image.Image) *image.RGBA {
 }
 
 
+// Convert string to image.YCbCrSubsampleRatio
+func parseYCbCrSubsampleRatio(s string) (image.YCbCrSubsampleRatio, error) {
+	switch s {
+	case "444":
+		return image.YCbCrSubsampleRatio444, nil
+	case "422":
+		return image.YCbCrSubsampleRatio422, nil
+	case "420":
+		return image.YCbCrSubsampleRatio420, nil
+	case "440":
+		return image.YCbCrSubsampleRatio440, nil
+	case "411":
+		return image.YCbCrSubsampleRatio411, nil
+	case "410":
+		return image.YCbCrSubsampleRatio410, nil
+	default:
+		return image.YCbCrSubsampleRatio(0), fmt.Errorf("unknown YCbCr subsample ratio: %s", s)
+	}
+}
+
 
 func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *float64, long_exit_mul *float64) {
 
@@ -293,19 +316,19 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 			return
 		}
 	case "image/avif":
-		img, err = png.Decode(file)
+		img, err = avif.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
 			return
 		}
 	case "image/jxl":
-		img, err = png.Decode(file)
+		img, err = jpegxl.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
 			return
 		}
 	case "image/heif", "image/heif-sequence", "image/heic", "image/heic-sequence":
-		img, err = png.Decode(file)
+		img, err = heic.Decode(file)
 		if err != nil {
 			fmt.Println("Error decoding WebP file:", err)
 			return
@@ -381,6 +404,42 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 			fmt.Println("Error encoding WebP file:", err)
 			return
 		}
+	case "image/avif":
+		err = avif.Dynamic()
+		if err != nil {
+			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
+			// return
+		}
+		fmt.Println("webp lossless:", webp_lossless)
+		err = avif.Encode(outfile, *croppedImg, avif.Options{Quality: quality0_100, QualityAlpha: quality0_100_alpha, Speed: avif_speed, ChromaSubsampling: chroma_sub})
+		if err != nil {
+			fmt.Println("Error encoding WebP file:", err)
+			return
+		}
+	case "image/jxl":
+		err = g2bwebp.Dynamic()
+		if err != nil {
+			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
+			// return
+		}
+		fmt.Println("webp lossless:", webp_lossless)
+		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: quality0_100, Method: webp_method, Exact: true})
+		if err != nil {
+			fmt.Println("Error encoding WebP file:", err)
+			return
+		}
+	case "image/heif", "image/heif-sequence", "image/heic", "image/heic-sequence":
+		err = g2bwebp.Dynamic()
+		if err != nil {
+			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
+			// return
+		}
+		fmt.Println("webp lossless:", webp_lossless)
+		err = g2bwebp.Encode(outfile, *croppedImg, g2bwebp.Options{Lossless: true, Quality: quality0_100, Method: webp_method, Exact: true})
+		if err != nil {
+			fmt.Println("Error encoding WebP file:", err)
+			return
+		}
 	case "image/png":
 		err = png.Encode(outfile, *croppedImg)
 		if err != nil {
@@ -411,10 +470,14 @@ var unsafe bool = false
 var webp_lossless bool = true
 var webp_lossy bool
 var webp_method int
+var avif_speed int
+var chroma_sub_str string
+var chroma_sub image.YCbCrSubsampleRatio
 var quality0_100 int
+var quality0_100_alpha int
 
 func main() {
-
+	var err error
 
     var input, output string
 	var short_exit_mul, long_exit_mul, border_p float64
@@ -429,11 +492,21 @@ func main() {
 
 	pflag.BoolVar(&webp_lossless, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
-	pflag.IntVarP(&quality0_100, "quality", "q", 95, "lossy webp and jpeg quality, 0 to 100 for webp, 1 to 100 for jpeg")
+	pflag.IntVar(&avif_speed, "avif_speed", 0, "Speed in the range [0,10]. Slower should make for a better quality image in less bytes. lower is slower")
+	pflag.StringVar(&chroma_sub_str, "chroma_sub", "422", "Chroma subsampling, 444|422|420. applys to avif")
+	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg")
+	pflag.IntVarP(&quality0_100, "quality_alpha", "a", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 
 	fmt.Println(webp_lossy)
 	webp_lossless = !webp_lossy
+
+	chroma_sub, err = parseYCbCrSubsampleRatio(chroma_sub_str)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("setting chrome subsampling to 422")
+		chroma_sub = image.YCbCrSubsampleRatio422
+	}
 
 	if quality0_100 < 0 {
 		quality0_100 = 0
