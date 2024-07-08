@@ -24,9 +24,9 @@ func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
 }
 
 
-func crop_brd(img *image.Image, border_percent float64) *image.Image {
+func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
 	// tlcol := img.At(0, 0)
-	var SimilarityThreshold float64 = 54
+	// var SimilarityThreshold float64 = 54
 
 	bounds := (*img).Bounds()
     width := bounds.Dx()
@@ -36,11 +36,11 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 
 	long_exit_w := int(math.Max(float64(width) * 0.05, 5))
 
-	if height < 20 {
+	if width < 20 {
 		short_exit_w = 2
 	}
 
-	border_px_wid := int(float64(width) * (border_percent / 100))
+	border_px_wid := int(float64(width) * (*border_percent / 100))
 
 	var final_pixel_wcnt int = -1
 	var wcnt_times int = 0
@@ -61,7 +61,7 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 
 		wcnt_times_long = 0
 		for y := bounds.Min.Y; y < height; y++ {
-			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_wcnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -79,7 +79,7 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 		for y := width; y > bounds.Min.Y ; y-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(width-x, y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(width-x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_wcnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -100,10 +100,15 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 	}
 
 	cwid := math.Min(float64(width - (final_pixel_wcnt - (border_px_wid * 2)) * 2), float64(width))
+	return &cwid, &final_pixel_wcnt
+}
 
+func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64) (*float64, *int) {
+	// tlcol := img.At(0, 0)
 
-
-
+	bounds := (*img).Bounds()
+    width := bounds.Dx()
+    height := bounds.Dy()
 
 
 	short_exit_h := int(math.Max(float64(height) * 0.01, 5))
@@ -114,7 +119,7 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 		short_exit_h = 2
 	}
 
-	border_px_hig := int(float64(width) * (border_percent / 100))
+	border_px_hig := int(float64(width) * (*border_percent / 100))
 
 	var final_pixel_hcnt int = -1
 	var hcnt_times int = 0
@@ -123,13 +128,13 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 
 
 	for y := bounds.Min.Y; y < width; y++ {
-		tl_col := (*img).At(0, 0).(color.NRGBA)
+		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y).(color.NRGBA)
 		fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		hcnt_times_long = 0
 		for x := bounds.Min.X; x < height; x++ {
-			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_hcnt = x
 				hcnt_times++
 				hcnt_times_long++
@@ -147,7 +152,7 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 		for x := height; x > bounds.Min.X ; x-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(x, height-y).(color.NRGBA), tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, height-y-2).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
 				final_pixel_hcnt = x
 				hcnt_times++
 				hcnt_times_long++
@@ -168,19 +173,33 @@ func crop_brd(img *image.Image, border_percent float64) *image.Image {
 	}
 
 	chig := math.Min(float64(height - (final_pixel_hcnt - (border_px_hig * 2)) * 2), float64(width))
+	return &chig, &final_pixel_hcnt
+}
 
 
 
 
 
+func crop_brd(img *image.Image, border_percent float64) *image.Image {
+
+	var SimilarityThreshold float64 = 54
+
+
+
+
+	cwid, final_pixel_wcnt := crop_brd_w(img, &border_percent, &SimilarityThreshold)
+	chig, final_pixel_hcnt := crop_brd_h(img, &border_percent, &SimilarityThreshold)
+
+
+	fmt.Printf("\nh crop: %v, w crop: %v\n", *final_pixel_hcnt, *final_pixel_wcnt)
 
 
 
 
 
 	croppedImg, err := cutter.Crop(*img, cutter.Config{
-		Width: int(math.Round(cwid)),
-		Height: int(math.Round(chig)),
+		Width: int(math.Round(*cwid)),
+		Height: int(math.Round(*chig)),
 		Mode: cutter.Centered,
 	  })
 	if err != nil {
