@@ -500,13 +500,15 @@ func main() {
 
     pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
 
-	pflag.BoolVar(&webp_lossless, "lossy", false, "lossy webp mode")
+	pflag.BoolVar(&webp_lossy, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
 	pflag.IntVar(&avif_speed, "avif_speed", 0, "Speed in the range [0,10]. Slower should make for a better quality image in less bytes. lower is slower")
 	pflag.StringVar(&chroma_sub_str, "chroma_sub", "444", "Chroma subsampling, 444|422|420. applys to avif")
 	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg\nQuality of 100 implies lossless for webp, jpeg xl, and avif")
 	pflag.IntVarP(&quality0_100_alpha, "quality_alpha", "a", 100, "alpha quality. avif,")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
+    pflag.Parse()
+    viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
 
 	fmt.Println(webp_lossy)
 	webp_lossless = !webp_lossy
@@ -525,8 +527,7 @@ func main() {
 		quality0_100 = 100
 	}
 
-    pflag.Parse()
-    viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
+
 
 	read_crop(&input, &output, &border_p, &short_exit_mul, &long_exit_mul)
 }
