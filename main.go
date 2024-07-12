@@ -25,11 +25,28 @@ import (
 )
 
 
-func IsSimilar(c1, c2 color.NRGBA, SimilarityThreshold float64) bool {
-	return math.Abs(float64(c1.R)-float64(c2.R)) <= SimilarityThreshold &&
-		math.Abs(float64(c1.G)-float64(c2.G)) <= SimilarityThreshold &&
-		math.Abs(float64(c1.B)-float64(c2.B)) <= SimilarityThreshold &&
-		math.Abs(float64(c1.A)-float64(c2.A)) <= SimilarityThreshold
+
+
+var iss_r1, iss_g1, iss_b1, iss_a1 uint32
+var iss_r2, iss_g2, iss_b2, iss_a2 uint32
+var iss_flr1, iss_flg1, iss_flb1, iss_fla1 float64
+var iss_flr2, iss_flg2, iss_flb2, iss_fla2 float64
+func IsSimilar(c1, c2 color.Color, SimilarityThreshold float64) bool {
+	iss_r1, iss_g1, iss_b1, iss_a1 = c1.RGBA()
+	iss_r2, iss_g2, iss_b2, iss_a2 = c2.RGBA()
+	iss_flr1 = float64(iss_r1)
+	iss_flg1 = float64(iss_g1)
+	iss_flb1 = float64(iss_b1)
+	iss_fla1 = float64(iss_a1)
+
+	iss_flr2 = float64(iss_r2)
+	iss_flg2 = float64(iss_g2)
+	iss_flb2 = float64(iss_b2)
+	iss_fla2 = float64(iss_a2)
+
+	return math.Abs(iss_flr1-iss_flr2) <= SimilarityThreshold ||
+		math.Abs(iss_flg1-iss_flg2) <= SimilarityThreshold ||
+		math.Abs(iss_flb1-iss_flb2) <= SimilarityThreshold
 }
 
 
@@ -62,13 +79,13 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	
 	for x := bounds.Min.X; x < width; x++ {
-		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y).(color.NRGBA)
+		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		wcnt_times_long = 0
 		for y := bounds.Min.Y; y < height; y++ {
-			if IsSimilar((*img).At(x, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, y), tl_col, *SimilarityThreshold) != true {
 				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -86,7 +103,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 		for y := width; y > bounds.Min.Y ; y-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(width-x-1, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
+			if IsSimilar((*img).At(width-x-1, y), tl_col, *SimilarityThreshold) != true {
 				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -151,14 +168,14 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	
 	for y := bounds.Min.Y; y < width; y++ {
-		tl_col := (*img).At(0, 0).(color.NRGBA)
+		tl_col := (*img).At(0, 0)
 		// fmt.Println("h tlcol:", tl_col)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		cnt_times_long = 0
 		for x := bounds.Min.X; x < height; x++ {
-			if IsSimilar((*img).At(x-1, y).(color.NRGBA), tl_col, *SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x-1, y), tl_col, *SimilarityThreshold) != true {
 				final_pixel_cnt = y
 				cnt_times++
 				cnt_times_long++
