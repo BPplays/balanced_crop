@@ -294,6 +294,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 	mime.AddExtensionType(".webp", "image/webp")
 	mime.AddExtensionType(".avif", "image/avif")
+	mime.AddExtensionType(".avifs", "image/avif")
 	mime.AddExtensionType(".jxl", "image/jxl")
 
 	in_mime := mime.TypeByExtension(filepath.Ext(*in))
@@ -441,7 +442,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 			fmt.Println("NON-fatal error Dynamic lib file. encoding time will be slower:\n	", err)
 			// return
 		}
-		fmt.Println("webp lossless:", webp_lossless)
+
 		err = jpegxl.Encode(outfile, *croppedImg, jpegxl.Options{Quality: quality0_100, Effort: jpegxl_effort})
 		if err != nil {
 			fmt.Println("Error encoding WebP file:", err)
@@ -503,6 +504,7 @@ func main() {
 	pflag.BoolVar(&webp_lossy, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
 	pflag.IntVar(&avif_speed, "avif_speed", 0, "Speed in the range [0,10]. Slower should make for a better quality image in less bytes. lower is slower")
+	pflag.IntVar(&jpegxl_effort, "jpegxl_effort", 7, "Effort in the range [1,10]. Sets encoder effort/speed level without affecting decoding speed. Default is 7.")
 	pflag.StringVar(&chroma_sub_str, "chroma_sub", "444", "Chroma subsampling, 444|422|420. applys to avif")
 	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg\nQuality of 100 implies lossless for webp, jpeg xl, and avif")
 	pflag.IntVarP(&quality0_100_alpha, "quality_alpha", "a", 100, "alpha quality. avif,")
