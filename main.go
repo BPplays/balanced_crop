@@ -80,12 +80,13 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 	
 	for x := bounds.Min.X; x < width; x++ {
 		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
+		tl_col_p := &tl_col
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		wcnt_times_long = 0
 		for y := bounds.Min.Y; y < height; y++ {
-			if IsSimilar((*img).At(x, y), &tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x, y), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -103,7 +104,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 		for y := width; y > bounds.Min.Y ; y-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(width-x-1, y), &tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(width-x-1, y), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
@@ -168,14 +169,15 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 	
 	for y := bounds.Min.Y; y < width; y++ {
-		tl_col := (*img).At(0, 0)
+		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
+		tl_col_p := &tl_col
 		// fmt.Println("h tlcol:", tl_col)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		cnt_times_long = 0
 		for x := bounds.Min.X; x < height; x++ {
-			if IsSimilar((*img).At(x-1, y), &tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x-1, y), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = y
 				cnt_times++
 				cnt_times_long++
@@ -193,7 +195,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 		for x := width; x > bounds.Min.X ; x-- {
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
-			if IsSimilar((*img).At(x-1, height-y-1), &tl_col, SimilarityThreshold) != true {
+			if IsSimilar((*img).At(x-1, height-y-1), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = y
 				cnt_times++
 				cnt_times_long++
