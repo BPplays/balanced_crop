@@ -25,32 +25,47 @@ import (
 )
 
 
+func uint32_abs(n1, n2 *uint32) uint32 {
+	if *n1 > *n2 {
+		return *n1 - *n2
+	} else {
+		return *n2 - *n1
+	}
+}
 
 
 var iss_r1, iss_g1, iss_b1, iss_a1 uint32
 var iss_r2, iss_g2, iss_b2, iss_a2 uint32
 var iss_flr1, iss_flg1, iss_flb1, iss_fla1 float64
 var iss_flr2, iss_flg2, iss_flb2, iss_fla2 float64
-func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *float64) bool {
+// func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *float64) bool {
+// 	iss_r1, iss_g1, iss_b1, iss_a1 = c1.RGBA()
+// 	iss_r2, iss_g2, iss_b2, iss_a2 = (*c2).RGBA()
+// 	iss_flr1 = float64(iss_r1)
+// 	iss_flg1 = float64(iss_g1)
+// 	iss_flb1 = float64(iss_b1)
+// 	iss_fla1 = float64(iss_a1)
+
+// 	iss_flr2 = float64(iss_r2)
+// 	iss_flg2 = float64(iss_g2)
+// 	iss_flb2 = float64(iss_b2)
+// 	iss_fla2 = float64(iss_a2)
+
+// 	return math.Abs(iss_flr1-iss_flr2) <= *SimilarityThreshold ||
+// 		math.Abs(iss_flg1-iss_flg2) <= *SimilarityThreshold ||
+// 		math.Abs(iss_flb1-iss_flb2) <= *SimilarityThreshold
+// }
+func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *uint32) bool {
 	iss_r1, iss_g1, iss_b1, iss_a1 = c1.RGBA()
 	iss_r2, iss_g2, iss_b2, iss_a2 = (*c2).RGBA()
-	iss_flr1 = float64(iss_r1)
-	iss_flg1 = float64(iss_g1)
-	iss_flb1 = float64(iss_b1)
-	iss_fla1 = float64(iss_a1)
 
-	iss_flr2 = float64(iss_r2)
-	iss_flg2 = float64(iss_g2)
-	iss_flb2 = float64(iss_b2)
-	iss_fla2 = float64(iss_a2)
-
-	return math.Abs(iss_flr1-iss_flr2) <= *SimilarityThreshold ||
-		math.Abs(iss_flg1-iss_flg2) <= *SimilarityThreshold ||
-		math.Abs(iss_flb1-iss_flb2) <= *SimilarityThreshold
+	return uint32_abs(&iss_r1, &iss_r2) <= *SimilarityThreshold ||
+		uint32_abs(&iss_g1, &iss_g2) <= *SimilarityThreshold ||
+		uint32_abs(&iss_b1, &iss_b2) <= *SimilarityThreshold
 }
 
 
-func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
+func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
@@ -70,6 +85,9 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 	var wcnt_times int = 0
 	var wcnt_times_long int = 0
 
+	SimilarityThreshold_nonp := uint32(*SimilarityThreshold_fl)
+	SimilarityThreshold := &SimilarityThreshold_nonp
+
 	
 
 	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -80,7 +98,6 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 	tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
 	tl_col_p := &tl_col
 	for x := bounds.Min.X; x < width; x++ {
-
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
@@ -140,7 +157,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 
 
 
-func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
+func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
     width := bounds.Dx()
     height := bounds.Dy()
@@ -160,7 +177,8 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 	var cnt_times int = 0
 	var cnt_times_long int = 0
 
-	
+	SimilarityThreshold_nonp := uint32(*SimilarityThreshold_fl)
+	SimilarityThreshold := &SimilarityThreshold_nonp
 
 	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
