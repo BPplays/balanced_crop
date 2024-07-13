@@ -77,10 +77,10 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 	// 	fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
 	// }
 
-	
+	tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
+	tl_col_p := &tl_col
 	for x := bounds.Min.X; x < width; x++ {
-		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
-		tl_col_p := &tl_col
+
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
@@ -167,10 +167,10 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold *
 	// 	fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
 	// }
 
-	
+	tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
+	tl_col_p := &tl_col
 	for y := bounds.Min.Y; y < width; y++ {
-		tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
-		tl_col_p := &tl_col
+
 		// fmt.Println("h tlcol:", tl_col)
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
