@@ -106,7 +106,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold *
 			// fmt.Println(IsSimilar((*img).At(bounds.Max.X-1, y).(color.NRGBA), tl_col, SimilarityThreshold))
 			// fmt.Println(final_pixel_wcnt, x)
 			col_at = (*img).At(width-x-1, y)
-			if IsSimilar(&col_at,&tl_col, SimilarityThreshold) != true {
+			if IsSimilar(&col_at, &tl_col, SimilarityThreshold) != true {
 				final_pixel_cnt = x
 				wcnt_times++
 				wcnt_times_long++
