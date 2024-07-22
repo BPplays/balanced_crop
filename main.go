@@ -87,8 +87,8 @@ func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *uint32) boo
 
 func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
-    width := bounds.Dx()
-    height := bounds.Dy()
+	width := bounds.Dx()
+	height := bounds.Dy()
 
 	short_exit := int(math.Max(float64(width) * (*short_exit_mul), 5))
 
@@ -108,7 +108,7 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold_f
 	SimilarityThreshold_nonp := uint32(*SimilarityThreshold_fl)
 	SimilarityThreshold := &SimilarityThreshold_nonp
 
-	
+
 
 	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
@@ -179,8 +179,8 @@ func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold_f
 
 func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
-    width := bounds.Dx()
-    height := bounds.Dy()
+	width := bounds.Dx()
+	height := bounds.Dy()
 
 	short_exit := int(math.Max(float64(height) * (*short_exit_mul), 5))
 
@@ -310,16 +310,16 @@ func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float6
 
 func imageToRGBA(src *image.Image) *image.RGBA {
 
-    // No conversion needed if image is an *image.RGBA.
-    if dst, ok := (*src).(*image.RGBA); ok {
-        return dst
-    }
+	// No conversion needed if image is an *image.RGBA.
+	if dst, ok := (*src).(*image.RGBA); ok {
+		return dst
+	}
 
-    // Use the image/draw package to convert to *image.RGBA.
-    b := (*src).Bounds()
-    dst := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-    draw.Draw(dst, dst.Bounds(), (*src), b.Min, draw.Src)
-    return dst
+	// Use the image/draw package to convert to *image.RGBA.
+	b := (*src).Bounds()
+	dst := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(dst, dst.Bounds(), (*src), b.Min, draw.Src)
+	return dst
 }
 
 
@@ -547,16 +547,16 @@ var quality0_100_alpha int
 func main() {
 	var err error
 
-    var input, output string
+	var input, output string
 	var short_exit_mul, long_exit_mul, border_p float64
 
-    pflag.StringVarP(&input, "input", "i", "", "file to read from")
-    pflag.StringVarP(&output, "output", "o", "", "output file")
-    pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.003, "placeholder")
-    pflag.Float64VarP(&long_exit_mul, "long_exit_mul", "l", 0.004, "placeholder")
-    pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
+	pflag.StringVarP(&input, "input", "i", "", "file to read from")
+	pflag.StringVarP(&output, "output", "o", "", "output file")
+	pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.003, "placeholder")
+	pflag.Float64VarP(&long_exit_mul, "long_exit_mul", "l", 0.004, "placeholder")
+	pflag.Float64VarP(&border_p, "border_percent", "b", 0.2, "a border percentage")
 
-    pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
+	pflag.BoolVar(&unsafe, "unsafe", false, "placeholder")
 
 	pflag.BoolVar(&webp_lossy, "lossy", false, "lossy webp mode")
 	pflag.IntVarP(&webp_method, "webp_method", "m", 6, "webp compression method (0=fastest, 6=slowest)")
@@ -566,8 +566,8 @@ func main() {
 	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg\nQuality of 100 implies lossless for webp, jpeg xl, and avif")
 	pflag.IntVarP(&quality0_100_alpha, "quality_alpha", "a", 100, "alpha quality. avif,")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
-    pflag.Parse()
-    viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
 
 	fmt.Println(webp_lossy)
 	webp_lossless = !webp_lossy
