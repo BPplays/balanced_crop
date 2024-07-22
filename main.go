@@ -25,6 +25,26 @@ import (
 )
 
 
+
+type px_range struct {
+	lo_h int
+	hi_h int
+
+	lo_w int
+	hi_w int
+}
+
+
+
+
+func in_range(h, w *int, r *px_range) bool {
+	return (*h > r.lo_h && *h < r.hi_h) && (*w > r.lo_w && *w < r.hi_w)
+}
+
+
+
+
+
 func uint32_abs(n1, n2 *uint32) uint32 {
 	if *n1 > *n2 {
 		return *n1 - *n2
