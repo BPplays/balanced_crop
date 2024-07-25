@@ -89,8 +89,25 @@ func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *uint32) boo
 func get_poss(l1, l2 *int, loop_type *string, width *int, height *int) (x *int, y *int) {
 	switch *loop_type {
 	case "r":
-		return
+		retw := *width - *l1 - 1
+		return &retw, l2
+
+	case "l":
+		return l1, l2
+
+	case "t":
+		retw := *l2 -1
+		return &retw, l1
+
+	case "b":
+		retw := *l2 -1
+		reth := *height - *l1 - 1
+		return &retw, &reth
 	}
+
+
+	rerr := 0
+	return &rerr, &rerr
 }
 
 
