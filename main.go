@@ -338,12 +338,26 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 	case "l":
 		l1 = bounds.Min.X
 		l1_max = width
+		l2 = bounds.Min.Y
+		l2_max = height
 
 	case "r":
 		l1 = bounds.Min.X
 		l1_max = width
+		l2 = bounds.Min.Y
+		l2_max = height
 
 	case "t":
+		l1 = bounds.Min.Y
+		l1_max = height
+		l2 = bounds.Min.X
+		l2_max = width
+
+	case "b":
+		l1 = bounds.Min.Y
+		l1_max = height
+		l2 = bounds.Min.X
+		l2_max = width
 	}
 
 
