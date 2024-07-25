@@ -298,7 +298,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold_f
 
 
 
-func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64, side *string) (cwid *float64, chig *float64, final_px_wcnt *int, final_px_hcnt *int) {
+func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64, side *string, sides_map *map[string]int) {
 	bounds := (*img).Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
@@ -360,16 +360,17 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 		l2_max = width
 	}
 
+	var x, y *int
 
-
-	for x := bounds.Min.X; x < width; x++ {
+	for l1 := l1; l1 < l1_max; l1++ {
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
 		wcnt_times_long = 0
-		for y := bounds.Min.Y; y < height; y++ {
-			if IsSimilar((*img).At(x, y), tl_col_p, SimilarityThreshold) != true {
-				final_pixel_cnt = x
+		for l2 := l2; l2 < l2_max; l2++ {
+			x, y = get_poss(&l1, &l2, side, &width, &height)
+			if IsSimilar((*img).At(*x, *y), tl_col_p, SimilarityThreshold) != true {
+				final_pixel_cnt = l1
 				wcnt_times++
 				wcnt_times_long++
 				// fmt.Println((*img).At(x, y).(color.NRGBA))
@@ -416,10 +417,22 @@ func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float6
 
 	sides := []string{"r", "l", "t", "b"}
 
+	sides_crop := map[string]int{
+		"apple":  1,
+		"banana": 2,
+		"cherry": 3,
+	}
 
 
-	cwid, final_pixel_wcnt := crop_brd_w(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
-	chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
+	var cwid, chig, final_pixel_wcnt, final_pixel_hcnt *int
+
+	//cwid, final_pixel_wcnt := crop_brd_w(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
+	//chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
+	for i, side := range sides {
+	cwid, chig, final_pixel_wcnt, final_pixel_hcnt = uni_crop(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul, &side, )
+	}
+
+
 
 
 	fmt.Printf("h crop: %v, w crop: %v\n", *final_pixel_hcnt, *final_pixel_wcnt)
