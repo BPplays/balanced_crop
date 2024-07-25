@@ -85,6 +85,17 @@ func IsSimilar(c1 color.Color, c2 *color.Color, SimilarityThreshold *uint32) boo
 }
 
 
+
+func get_poss(l1, l2 *int, loop_type *string, width *int, height *int) (x *int, y *int) {
+	switch *loop_type {
+	case "r":
+		return
+	}
+}
+
+
+
+
 func crop_brd_w(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64) (*float64, *int) {
 	bounds := (*img).Bounds()
 	width := bounds.Dx()
