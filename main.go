@@ -298,11 +298,109 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold_f
 
 
 
+func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64, side *string) (cwid *float64, chig *float64, final_px_wcnt *int, final_px_hcnt *int) {
+	bounds := (*img).Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+
+	short_exit := int(math.Max(float64(width) * (*short_exit_mul), 5))
+
+	long_exit := int(math.Max(float64(width) * (*long_exit_mul), 5))
+
+	if width < 20 {
+		short_exit = 2
+	}
+
+	border_px_wid := int(float64(width) * (*border_percent / 100))
+
+	var final_pixel_cnt int = -1
+
+	var wcnt_times int = 0
+	var wcnt_times_long int = 0
+
+	SimilarityThreshold_nonp := uint32(*SimilarityThreshold_fl)
+	SimilarityThreshold := &SimilarityThreshold_nonp
+
+
+
+	// for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+	// 	rightmostColor := (*img).At(bounds.Max.X-1, y).(color.NRGBA)
+	// 	fmt.Printf("Pixel at (%d, %d) color: R=%d, G=%d, B=%d, A=%d\n", bounds.Max.X-1, y, rightmostColor.R, rightmostColor.G, rightmostColor.B, rightmostColor.A)
+	// }
+
+	tl_col := (*img).At(bounds.Min.X, bounds.Min.Y)
+	tl_col_p := &tl_col
+
+
+	var l1, l1_max, l2, l2_max int
+
+	switch *side {
+	case "l":
+		l1 = bounds.Min.X
+		l1_max = width
+
+	case "r":
+		l1 = bounds.Min.X
+		l1_max = width
+
+	case "t":
+	}
+
+
+
+	for x := bounds.Min.X; x < width; x++ {
+		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
+
+
+		wcnt_times_long = 0
+		for y := bounds.Min.Y; y < height; y++ {
+			if IsSimilar((*img).At(x, y), tl_col_p, SimilarityThreshold) != true {
+				final_pixel_cnt = x
+				wcnt_times++
+				wcnt_times_long++
+				// fmt.Println((*img).At(x, y).(color.NRGBA))
+			} else {
+				wcnt_times = 0
+			}
+			if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+				break
+			}
+		}
+
+
+
+
+		// final_pixel_cnt = int(math.Min(float64(final_pixel_cnt1), float64(final_pixel_cnt2)))
+		// if final_pixel_cnt < 0 {
+		// 	if final_pixel_cnt1 >= 0 || final_pixel_cnt2 >= 0 {
+		// 		final_pixel_cnt = 0
+		// 	}
+		// }
+
+		// final_pixel_cnt = final_pixel_cnt1
+		// fmt.Printf("windth -- final_pixel_cnt1: %v, final_pixel_cnt2: %v\n", final_pixel_cnt1, final_pixel_cnt2)
+
+		if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+			// fmt.Println(final_pixel_wcnt)
+			break
+		}
+
+	}
+
+	cwid := math.Min(float64(width - (final_pixel_cnt - (border_px_wid * 2)) * 2), float64(width))
+	return &cwid, &final_pixel_cnt
+
+}
+
+
+
 
 func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float64, long_exit_mul *float64) *image.Image {
 
 	var SimilarityThreshold float64 = 5
 
+
+	sides := []string{"r", "l", "t", "b"}
 
 
 
