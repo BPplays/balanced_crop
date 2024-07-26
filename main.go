@@ -315,8 +315,8 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 
 	var final_pixel_cnt int = -1
 
-	var wcnt_times int = 0
-	var wcnt_times_long int = 0
+	var cnt_times int = 0
+	var cnt_times_long int = 0
 
 	SimilarityThreshold_nonp := uint32(*SimilarityThreshold_fl)
 	SimilarityThreshold := &SimilarityThreshold_nonp
@@ -366,18 +366,18 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 		// fmt.Println(IsSimilar(tl_col, tl_col, 10))
 
 
-		wcnt_times_long = 0
+		cnt_times_long = 0
 		for l2 := l2; l2 < l2_max; l2++ {
 			x, y = get_poss(&l1, &l2, side, &width, &height)
 			if IsSimilar((*img).At(*x, *y), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = l1
-				wcnt_times++
-				wcnt_times_long++
+				cnt_times++
+				cnt_times_long++
 				// fmt.Println((*img).At(x, y).(color.NRGBA))
 			} else {
-				wcnt_times = 0
+				cnt_times = 0
 			}
-			if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+			if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
 				break
 			}
 		}
@@ -395,18 +395,24 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 		// final_pixel_cnt = final_pixel_cnt1
 		// fmt.Printf("windth -- final_pixel_cnt1: %v, final_pixel_cnt2: %v\n", final_pixel_cnt1, final_pixel_cnt2)
 
-		if final_pixel_cnt >= 0 && (wcnt_times > short_exit || wcnt_times_long > long_exit) {
+		if final_pixel_cnt >= 0 && (cnt_times > short_exit || cnt_times_long > long_exit) {
 			// fmt.Println(final_pixel_wcnt)
 			break
 		}
 
 	}
 
-	cwid := math.Min(float64(width - (final_pixel_cnt - (border_px_wid * 2)) * 2), float64(width))
-	return &cwid, &final_pixel_cnt
+	return
 
 }
 
+func min_int(a int, b int) *int {
+	if a < b {
+		return &a
+	} else {
+		return &b
+	}
+}
 
 
 
@@ -415,22 +421,54 @@ func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float6
 	var SimilarityThreshold float64 = 5
 
 
+
+	bounds := (*img).Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+
+	border_px_wid := int(float64(width) * (*border_percent / 100))
+	border_px_hi := int(float64(height) * (*border_percent / 100))
+
+
+
+
+
+
+
+
+
+
+
+
 	sides := []string{"r", "l", "t", "b"}
 
 	sides_crop := map[string]int{
-		"apple":  1,
-		"banana": 2,
-		"cherry": 3,
+		"r": 0,
+		"l": 0,
+		"t": 0,
+		"b": 0,
 	}
 
 
-	var cwid, chig, final_pixel_wcnt, final_pixel_hcnt *int
+	var final_pixel_wcnt, final_pixel_hcnt *int
+
+	var cwid, chig *float64
 
 	//cwid, final_pixel_wcnt := crop_brd_w(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
 	//chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
-	for i, side := range sides {
-	cwid, chig, final_pixel_wcnt, final_pixel_hcnt = uni_crop(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul, &side, )
+	for _, side := range sides {
+		uni_crop(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul, &side, &sides_crop)
 	}
+
+
+	final_pixel_wcnt = min_int(sides_crop["r"], sides_crop["l"])
+	final_pixel_hcnt = min_int(sides_crop["t"], sides_crop["b"])
+
+	cwidt := math.Min(float64(width - ((*final_pixel_wcnt) - (border_px_wid * 2)) * 2), float64(width))
+	cwid = &cwidt
+
+	chigt := math.Min(float64(height - ((*final_pixel_hcnt) - (border_px_hi * 2)) * 2), float64(height))
+	chig = &chigt
 
 
 
