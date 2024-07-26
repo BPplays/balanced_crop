@@ -688,6 +688,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	}
 	defer outfile.Close()
 
+
 	switch out_mime {
 	case "image/webp":
 		err = g2bwebp.Dynamic()
@@ -868,6 +869,15 @@ func main() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
 
+
+
+
+	fmt.Printf("\n\n========================================\n========================================\nmaking file: %v\n\n\n", output)
+
+
+
+
+
 	if input_ex_ranges != "" {
 		ex_ranges = parse_excludes(input_ex_ranges)
 		fmt.Println("exclude:", ex_ranges)
@@ -894,4 +904,8 @@ func main() {
 
 
 	read_crop(&input, &output, &border_p, &short_exit_mul, &long_exit_mul, &ex_ranges)
+
+
+
+	fmt.Print("\n\n========================================\n========================================\n")
 }
