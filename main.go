@@ -44,6 +44,23 @@ func in_range(h, w *int, r *px_range) bool {
 }
 
 
+var in_ranges_ir bool
+var in_ranges_pxr px_range
+func in_ranges(h, w *int, r *[]px_range) bool {
+
+
+	for _, in_ranges_pxr = range *r {
+		in_ranges_ir = in_range(h, w, &in_ranges_pxr)
+		if in_ranges_ir {
+			return true
+		}
+	}
+
+	return false
+}
+
+
+
 
 
 
