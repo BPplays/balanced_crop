@@ -39,18 +39,18 @@ type px_range struct {
 
 
 
-func in_range(h, w *int, r *px_range) bool {
-	return (*h > r.lo_h && *h < r.hi_h) && (*w > r.lo_w && *w < r.hi_w)
+func in_range(x, y *int, r *px_range) bool {
+	return (*y > r.lo_h && *y < r.hi_h) && (*x > r.lo_w && *x < r.hi_w)
 }
 
 
 var in_ranges_ir bool
 var in_ranges_pxr px_range
-func in_ranges(h, w *int, r *[]px_range) bool {
+func in_ranges(x, y *int, r *[]px_range) bool {
 
 
 	for _, in_ranges_pxr = range *r {
-		in_ranges_ir = in_range(h, w, &in_ranges_pxr)
+		in_ranges_ir = in_range(x, y, &in_ranges_pxr)
 		if in_ranges_ir {
 			return true
 		}
@@ -388,6 +388,7 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 		for l2 := l2; l2 < l2_max; l2++ {
 			x, y = get_poss(&l1, &l2, side, &width, &height)
 			if in_ranges(x, y, ranges) {
+				//fmt.Println("range hit", *x, *y)
 				continue
 			}
 			// fmt.Printf("side: %v, x: %v, y: %v\n", *side, *x, *y)
@@ -869,6 +870,7 @@ func main() {
 
 	if input_ex_ranges != "" {
 		ex_ranges = parse_excludes(input_ex_ranges)
+		fmt.Println("exclude:", ex_ranges)
 	}
 
 
