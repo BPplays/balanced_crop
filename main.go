@@ -12,6 +12,8 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gen2brain/avif"
@@ -727,6 +729,80 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 	fmt.Println("encoding time:", time.Since(encstart))
 
 }
+
+
+
+
+
+func parse_excludes(s string) []px_range {
+	var fin_range []px_range
+
+	s = strings.ReplaceAll(s, " ", "")
+	ranges := strings.Split(s, ";")
+
+
+	for _, rang := range ranges {
+		rang_spl := strings.Split(rang, "-")
+		r1 := strings.Split(rang_spl[0], ",")
+		r2 := strings.Split(rang_spl[1], ",")
+
+		x1, err := strconv.Atoi(r1[0])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		y1, err := strconv.Atoi(r1[1])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+
+
+		x2, err := strconv.Atoi(r2[0])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		y2, err := strconv.Atoi(r2[1])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+
+		var low_x int
+		var hi_x int
+
+		var low_y int
+		var hi_y int
+
+		if x1 < x2 {
+			low_x = x1
+			hi_x = x2
+		} else {
+			low_x = x2
+			hi_x = x1
+		}
+
+		if y1 < y2 {
+			low_y = y1
+			hi_y = y2
+		} else {
+			low_y = y2
+			hi_y = y1
+		}
+
+
+
+		fin_range = append(fin_range, px_range{lo_w: low_x, lo_h: low_y, hi_w: hi_x, hi_h: hi_y})
+	}
+
+	return fin_range
+}
+
+
+
+
+
 
 
 var unsafe bool = false
