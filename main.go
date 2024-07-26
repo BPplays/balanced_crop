@@ -317,7 +317,7 @@ func crop_brd_h(img *image.Image, border_percent *float64, SimilarityThreshold_f
 
 
 
-func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64, side *string, sides_map *map[string]int) map[string]int {
+func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl *float64, short_exit_mul *float64, long_exit_mul *float64, side *string, sides_map *map[string]int, ranges *[]px_range) map[string]int {
 	bounds := (*img).Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
@@ -387,6 +387,9 @@ func uni_crop(img *image.Image, border_percent *float64, SimilarityThreshold_fl 
 		cnt_times_long = 0
 		for l2 := l2; l2 < l2_max; l2++ {
 			x, y = get_poss(&l1, &l2, side, &width, &height)
+			if in_ranges(x, y, ranges) {
+				continue
+			}
 			// fmt.Printf("side: %v, x: %v, y: %v\n", *side, *x, *y)
 			if IsSimilar((*img).At(*x, *y), tl_col_p, SimilarityThreshold) != true {
 				final_pixel_cnt = l1
@@ -439,7 +442,7 @@ func min_int(a int, b int) *int {
 
 
 
-func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float64, long_exit_mul *float64) *image.Image {
+func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float64, long_exit_mul *float64, ranges *[]px_range) *image.Image {
 
 	var SimilarityThreshold float64 = 5
 
@@ -482,7 +485,7 @@ func crop_brd(img *image.Image, border_percent *float64 , short_exit_mul *float6
 	//cwid, final_pixel_wcnt := crop_brd_w(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
 	//chig, final_pixel_hcnt := crop_brd_h(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul)
 	for _, side := range sides {
-		sides_crop_out = uni_crop(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul, &side, &sides_crop)
+		sides_crop_out = uni_crop(img, border_percent, &SimilarityThreshold, short_exit_mul, long_exit_mul, &side, &sides_crop, ranges)
 	}
 
 
@@ -560,7 +563,7 @@ func parseYCbCrSubsampleRatio(s string) (image.YCbCrSubsampleRatio, error) {
 }
 
 
-func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *float64, long_exit_mul *float64) {
+func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *float64, long_exit_mul *float64, ranges *[]px_range) {
 
 	var img image.Image
 	var err error
@@ -672,7 +675,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 
 	cropstart := time.Now()
-	croppedImg := crop_brd(&img, border_p, short_exit_mul, long_exit_mul)
+	croppedImg := crop_brd(&img, border_p, short_exit_mul, long_exit_mul, ranges)
 	fmt.Println("trim and crop time:", time.Since(cropstart))
 
 
@@ -840,6 +843,10 @@ func main() {
 	var input, output string
 	var short_exit_mul, long_exit_mul, border_p float64
 
+
+	var input_ex_ranges string
+	var ex_ranges []px_range
+
 	pflag.StringVarP(&input, "input", "i", "", "file to read from")
 	pflag.StringVarP(&output, "output", "o", "", "output file")
 	pflag.Float64VarP(&short_exit_mul, "short_exit_mul", "s", 0.003, "placeholder")
@@ -853,11 +860,17 @@ func main() {
 	pflag.IntVar(&avif_speed, "avif_speed", 0, "Speed in the range [0,10]. Slower should make for a better quality image in less bytes. lower is slower")
 	pflag.IntVar(&jpegxl_effort, "jpegxl_effort", 7, "Effort in the range [1,10]. Sets encoder effort/speed level without affecting decoding speed. Default is 7.")
 	pflag.StringVar(&chroma_sub_str, "chroma_sub", "444", "Chroma subsampling, 444|422|420. applys to avif")
+	pflag.StringVarP(&input_ex_ranges, "exclude_ranges", "e", "", "px ranges to exclude")
 	pflag.IntVarP(&quality0_100, "quality", "q", 100, "lossy webp and jpeg quality, 0 to 100 for webp, avif, jpeg xl, heic. 1 to 100 for jpeg\nQuality of 100 implies lossless for webp, jpeg xl, and avif")
 	pflag.IntVarP(&quality0_100_alpha, "quality_alpha", "a", 100, "alpha quality. avif,")
 	// pflag.IntVar(&jpeg_qual, "jpeg_quality", 95, "jpeg quality 0 to 100")
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine) // Bind pflag to viper
+
+	if input_ex_ranges != "" {
+		ex_ranges = parse_excludes(input_ex_ranges)
+	}
+
 
 	fmt.Println(webp_lossy)
 	webp_lossless = !webp_lossy
@@ -878,5 +891,5 @@ func main() {
 
 
 
-	read_crop(&input, &output, &border_p, &short_exit_mul, &long_exit_mul)
+	read_crop(&input, &output, &border_p, &short_exit_mul, &long_exit_mul, &ex_ranges)
 }
