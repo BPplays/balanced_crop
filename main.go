@@ -723,7 +723,7 @@ func read_crop(in *string, out *string, border_p *float64 , short_exit_mul *floa
 
 		err = jpegxl.Encode(outfile, *croppedImg, jpegxl.Options{Quality: quality0_100, Effort: jpegxl_effort})
 		if err != nil {
-			fmt.Println("Error encoding WebP file:", err)
+			fmt.Println("Error encoding jxl file:", err)
 			return
 		}
 	case "image/heif", "image/heif-sequence", "image/heic", "image/heic-sequence":
